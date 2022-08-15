@@ -6,13 +6,29 @@ import Test from './Test'
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-
-console.log(process.env)
+import {
+  Routes,
+  Route,
+  BrowserRouter,
+  useLocation,
+  useNavigationType,
+  createRoutesFromChildren,
+  matchRoutes,
+} from "react-router-dom";
 
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DNS,
-  integrations: [new BrowserTracing()],
+  integrations: [
+    new BrowserTracing({
+      routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes,
+      ),
+  }),
+  ],
 
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control
@@ -20,14 +36,16 @@ Sentry.init({
   environment: process.env.REACT_APP_ENVIRONMENT
 });
 
+const SentryRoutes = Sentry.withSentryReactRouterV6Routing(Routes)
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Routes>
+      <SentryRoutes>
         <Route path="/" element={<App />} />
         <Route path="/test/:id" element={<Test />} />
-      </Routes>
+      </SentryRoutes>
     </BrowserRouter>
   </React.StrictMode>
 );
