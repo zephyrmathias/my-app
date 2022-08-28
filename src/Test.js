@@ -11,6 +11,7 @@ const Test = () => {
     <div>
       test id: {params.id}
       <button onClick={() => onClick()}>onClick</button>
+      <div>version = {process.env.REACT_APP_VERSION}</div>
     </div>
   )
 }
